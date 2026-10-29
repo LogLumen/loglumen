@@ -1,11 +1,25 @@
 ---
-name: loglumen-cli
-description: Inspect and configure a LogLumen server from the terminal with `loglumen-cli`. Use this skill whenever the user wants to see which projects, runs, metrics or fields were logged, look at logged values (e.g. how loss evolved over steps or differed between runs), or list, add, change, move, resize or remove charts on a LogLumen dashboard, or otherwise work with LogLumen through its API, even if they don't name the CLI.
+name: loglumen
+description: Log metrics to LogLumen from Python or Rust code, then inspect and configure them from the terminal with `loglumen-cli`. Use this skill whenever the user wants to add LogLumen to a project, log metrics such as loss or accuracy from a training loop or other code, see which projects, runs, metrics or fields were logged, look at logged values (e.g. how loss evolved over steps or differed between runs), or list, add, change, move, resize or remove charts on a LogLumen dashboard, or otherwise work with LogLumen, even if they don't name the CLI or the client.
 ---
 
-# loglumen-cli
+# LogLumen
 
-`loglumen-cli` inspects logged metrics and configures LogLumen through its HTTP API. It never touches the database. Run `loglumen-cli <command> --help` for anything not covered here.
+LogLumen has two parts. The Python and Rust clients log metrics from code. `loglumen-cli` inspects the logged metrics and configures LogLumen through its HTTP API, and never touches the database. Run `loglumen-cli <command> --help` for anything not covered here.
+
+## Logging from code
+
+- **Python:** read `references/python.md`.
+- **Rust:** read `references/rust.md`.
+
+What both clients share:
+
+- Each `log` call writes one entry: a metric entry key with numeric fields, all stored under the same timestamp.
+- Charts and queries can only use fields of the same key as the x axis. Log the step counter in every entry, e.g. `train` with `step`, `loss` and `learning_rate`.
+- The project name defaults to the name of the git repo's top-level directory, or of the current directory outside a repo.
+- The run name defaults to the UTC start time, e.g. `2026-10-25T14-03-12`, so every process start is a new run. Reusing a run name appends to that run.
+- All projects write to one shared SQLite file, `loglumen/loglumen.sqlite` in the user data directory (`~/Library/Application Support/` on macOS, `~/.local/share/` on Linux). The server reads it by default. If the client sets a different `db_path`, the server needs `CLIENT_DB_PATH` set to the same path.
+- To check that logging works, run the code, then `runs list` and `metrics list` for the project.
 
 ## Connection
 
@@ -14,6 +28,20 @@ description: Inspect and configure a LogLumen server from the terminal with `log
   - Never print the password or put it on a command line you show the user. Prefer the environment variable or `.env`.
 - Both options work before or after any subcommand.
 - `unauthorized: pass --admin-password or set ADMIN_PASSWORD` means the password is missing or wrong. Ask the user for it rather than guessing.
+
+## Running the server
+
+If nothing is listening at the server URL, `loglumen-cli` can run one. It uses the `loglumen-server` binary next to the CLI or on `PATH`. If neither has one, it downloads the release matching the CLI's version.
+
+| Command | Description |
+|---|---|
+| `loglumen-cli server start [--detached] [--port <port>]` | Run the server. `--detached` keeps it in the background |
+| `loglumen-cli server status` | Show whether the detached server is running |
+| `loglumen-cli server logs` | Print the detached server's log |
+| `loglumen-cli server stop` | Stop the detached server |
+
+- Agents should always pass `--detached`. Without it, the command blocks until the server exits.
+- The admin password is passed to the server the same way as above.
 
 ## Exploring logged data
 

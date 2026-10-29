@@ -4,7 +4,18 @@ use anyhow::{Context, Result};
 use clap::{Args, Subcommand, ValueEnum};
 
 const SKILL: &str = include_str!("../skill/SKILL.md");
-const NAME: &str = "loglumen-cli";
+const FILES: [(&str, &str); 3] = [
+    ("SKILL.md", SKILL),
+    (
+        "references/python.md",
+        include_str!("../skill/references/python.md"),
+    ),
+    (
+        "references/rust.md",
+        include_str!("../skill/references/rust.md"),
+    ),
+];
+const NAME: &str = "loglumen";
 
 #[derive(Args)]
 pub struct SkillArgs {
@@ -72,10 +83,17 @@ fn install(agents: &[Agent], project: bool) -> Result<()> {
     dirs.sort();
     dirs.dedup();
     for dir in dirs {
-        std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
-        let path = dir.join("SKILL.md");
-        std::fs::write(&path, SKILL).with_context(|| format!("writing {}", path.display()))?;
-        println!("installed {}", path.display());
+        for (file, contents) in FILES {
+            let path = dir.join(file);
+            let parent = path
+                .parent()
+                .context("skill file has no parent directory")?;
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("creating {}", parent.display()))?;
+            std::fs::write(&path, contents)
+                .with_context(|| format!("writing {}", path.display()))?;
+        }
+        println!("installed {}", dir.display());
     }
     Ok(())
 }
