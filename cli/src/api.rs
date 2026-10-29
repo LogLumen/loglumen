@@ -33,6 +33,10 @@ impl ApiArgs {
             admin_password: self.admin_password.clone().filter(|p| !p.is_empty()),
         })
     }
+
+    pub fn admin_password(&self) -> Option<&str> {
+        self.admin_password.as_deref().filter(|p| !p.is_empty())
+    }
 }
 
 pub struct ApiClient {

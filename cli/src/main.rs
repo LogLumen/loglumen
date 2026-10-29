@@ -2,6 +2,7 @@ mod api;
 mod catalog;
 mod charts;
 mod query;
+mod server;
 mod skill;
 
 use anyhow::Result;
@@ -34,6 +35,8 @@ enum Command {
     Charts(charts::ChartsArgs),
     /// Install the agent skill for coding agents
     Skill(skill::SkillArgs),
+    /// Run the LogLumen server
+    Server(server::ServerArgs),
 }
 
 fn main() -> Result<()> {
@@ -47,6 +50,7 @@ fn main() -> Result<()> {
         Command::Query(args) => query::run(&cli.api.client()?, args),
         Command::Charts(args) => charts::run(&cli.api.client()?, args),
         Command::Skill(args) => skill::run(args),
+        Command::Server(args) => server::run(&cli.api, args),
     }
 }
 
