@@ -1,0 +1,22 @@
+[package]
+name = "be"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+axum = { version = "0.8.9", features = ["ws"] }
+axum-extra = { version = "0.12.6", features = ["typed-header"] }
+dotenvy = "0.15.7"
+envy = "0.4.2"
+loglumen-core = { version = "0.1.0", path = "../core" }
+rust-embed = { version = "8.13.0", features = ["mime-guess"] }
+sea-query = { version = "1.0.2", default-features = false, features = ["backend-sqlite", "derive"] }
+sea-query-sqlx = { version = "0.9.1", features = ["sqlx-sqlite"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", features = ["sqlite", "runtime-tokio", "macros", "json", "uuid", "time"] }
+time = { version = "0.3.55", features = ["serde", "formatting"] }
+tokio = { version = "1.54.1", features = ["full"] }
+uuid = { version = "1.29.0", features = ["v7", "serde"] }
+vec1 = { version = "1.12.1", features = ["serde"] }

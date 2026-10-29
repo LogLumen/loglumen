@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+
+@theme static {
+	--font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	--color-bg: #ffffff;
+	--color-fg: #0f172a;
+	--color-muted: #64748b;
+	--color-subtle: #334155;
+	--color-border: #cbd5e1;
+	--color-line: #e2e8f0;
+	--color-grid: #eef1f5;
+	--color-surface: #f8fafc;
+	--color-selected: #f1f5fb;
+	--color-active: #eef2fb;
+	--color-accent: #1d4ed8;
+	--color-accent-hover: #1e3a8a;
+	--color-crosshair: #94a3b8;
+	--color-ok: #15803d;
+	--color-warn: #b45309;
+	--color-err: #b91c1c;
+}
+
+html,
+body {
+	margin: 0;
+	background-color: var(--color-bg);
+	color: var(--color-fg);
+	font-family: var(--font-sans);
+	font-size: 14px;
+	overflow-x: hidden;
+}
+
+select,
+button,
+input {
+	font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+.lc-root-container {
+	--color-surface-100: var(--color-bg);
+	--color-surface-200: var(--color-surface);
+	--color-surface-300: var(--color-line);
+	--color-surface-content: var(--color-fg);
+}

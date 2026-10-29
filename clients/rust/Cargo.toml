@@ -1,0 +1,18 @@
+[package]
+name = "loglumen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-trait = "0.1.92"
+loglumen-core = { version = "0.1.0", path = "../../core" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "sqlite"] }
+thiserror = "2.0.21"
+time = { version = "0.3", features = ["formatting", "macros"] }
+tokio = { version = "1.54.1", features = ["sync", "rt", "macros"] }
+
+[dev-dependencies]
+rand = "0.10.3"
+tokio = { version = "1.54.1", features = ["rt", "macros", "time"] }
