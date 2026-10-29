@@ -3,6 +3,7 @@ use serde::Deserialize;
 use serde_json::Number;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteConnection, SqliteJournalMode};
 use sqlx::{ConnectOptions, QueryBuilder, Sqlite};
+use std::borrow::Cow;
 use std::sync::OnceLock;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
@@ -27,14 +28,14 @@ pub fn sqlite_db_path() -> std::path::PathBuf {
 }
 
 #[derive(Debug)]
-pub struct Payload(pub Vec<(&'static str, Number)>);
+pub struct Payload(pub Vec<(Cow<'static, str>, Number)>);
 
 // The global singleton instance
 static PRODUCER: OnceLock<Producer> = OnceLock::new();
 
 #[derive(Debug)]
 struct Log {
-    key: &'static str,
+    key: Cow<'static, str>,
     timestamp: u64,
     payload: Payload,
 }
@@ -48,7 +49,7 @@ impl Producer {
         Self { tx }
     }
 
-    pub fn log(&self, key: &'static str, payload: Payload) {
+    pub fn log(&self, key: Cow<'static, str>, payload: Payload) {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -129,7 +130,7 @@ impl StorageEngineT for SqliteStorageEngine {
         );
         query.push_values(log.payload.0, |mut row, (field, value)| {
             row.push_bind(self.run_id)
-                .push_bind(log.key)
+                .push_bind(log.key.clone())
                 .push_bind(field)
                 .push_bind(log.timestamp as i64)
                 .push_bind(value.as_f64());
@@ -242,17 +243,29 @@ impl Config {
     }
 }
 
-pub fn log(key: &'static str, payload: Payload) {
+pub fn log(key: impl Into<Cow<'static, str>>, payload: impl Into<Payload>) {
+    let key = key.into();
     if let Some(producer) = PRODUCER.get() {
-        producer.log(key, payload);
+        producer.log(key, payload.into());
     } else {
         eprintln!("LogLumen not initialized! Dropped log: {}", key);
     }
 }
 
-#[doc(hidden)]
 pub trait IntoNumber {
     fn into_number(self) -> Option<Number>;
+}
+
+impl IntoNumber for Number {
+    fn into_number(self) -> Option<Number> {
+        Some(self)
+    }
+}
+
+impl IntoNumber for Option<Number> {
+    fn into_number(self) -> Option<Number> {
+        self
+    }
 }
 
 macro_rules! impl_into_number {
@@ -272,19 +285,34 @@ macro_rules! impl_into_number {
 
 impl_into_number!(i8, i16, i32, i64, isize, u8, u16, u32, u64, usize; f32, f64);
 
-#[doc(hidden)]
-pub fn payload<const N: usize>(fields: [(&'static str, Option<Number>); N]) -> Payload {
-    Payload(
-        fields
-            .into_iter()
-            .filter_map(|(field, value)| {
-                if value.is_none() {
-                    eprintln!("Dropped non-finite value of field: {field}");
-                }
-                value.map(|value| (field, value))
-            })
-            .collect(),
-    )
+impl<K: Into<Cow<'static, str>>, V: IntoNumber> FromIterator<(K, V)> for Payload {
+    fn from_iter<I: IntoIterator<Item = (K, V)>>(fields: I) -> Self {
+        Payload(
+            fields
+                .into_iter()
+                .filter_map(|(field, value)| {
+                    let field = field.into();
+                    let value = value.into_number();
+                    if value.is_none() {
+                        eprintln!("Dropped non-finite value of field: {field}");
+                    }
+                    value.map(|value| (field, value))
+                })
+                .collect(),
+        )
+    }
+}
+
+impl<K: Into<Cow<'static, str>>, V: IntoNumber, const N: usize> From<[(K, V); N]> for Payload {
+    fn from(fields: [(K, V); N]) -> Self {
+        fields.into_iter().collect()
+    }
+}
+
+impl<K: Into<Cow<'static, str>>, V: IntoNumber> From<Vec<(K, V)>> for Payload {
+    fn from(fields: Vec<(K, V)>) -> Self {
+        fields.into_iter().collect()
+    }
 }
 
 #[macro_export]
@@ -292,7 +320,7 @@ macro_rules! log {
     ($key:expr, $($field:ident = $value:expr),+ $(,)?) => {
         $crate::log(
             $key,
-            $crate::payload([$((stringify!($field), $crate::IntoNumber::into_number($value))),+]),
+            [$((stringify!($field), $crate::IntoNumber::into_number($value))),+],
         )
     };
 }

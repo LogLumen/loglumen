@@ -28,7 +28,7 @@ async fn main() {
             );
         }
     }
-    ll::log("eval", ll::Payload(vec![("accuracy", 90.into())]));
+    ll::log("eval", [("accuracy", 90)]);
 
     // Give the writer a moment to drain the queue before exiting.
     tokio::time::sleep(Duration::from_millis(500)).await;
