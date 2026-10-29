@@ -1,7 +1,11 @@
 [package]
 name = "loglumen-server"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
 
 [dependencies]
 anyhow = "1.0.104"
@@ -9,7 +13,7 @@ axum = { version = "0.8.9", features = ["ws"] }
 axum-extra = { version = "0.12.6", features = ["typed-header"] }
 dotenvy = "0.15.7"
 envy = "0.4.2"
-loglumen-core = { version = "0.1.0", path = "../core" }
+loglumen = { version = "0.1.0", path = "../clients/rust" }
 rust-embed = { version = "8.13.0", features = ["mime-guess"] }
 sea-query = { version = "1.0.2", default-features = false, features = ["backend-sqlite", "derive"] }
 sea-query-sqlx = { version = "0.9.1", features = ["sqlx-sqlite"] }

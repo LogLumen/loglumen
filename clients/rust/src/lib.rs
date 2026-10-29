@@ -19,6 +19,13 @@ pub enum LoglumenError {
 
 pub type LoglumenResult<T> = Result<T, LoglumenError>;
 
+pub fn sqlite_db_path() -> std::path::PathBuf {
+    dirs::data_dir()
+        .unwrap_or_default()
+        .join("loglumen")
+        .join("loglumen.sqlite")
+}
+
 #[derive(Debug)]
 pub struct Payload(pub Vec<(&'static str, Number)>);
 
@@ -180,7 +187,7 @@ impl Default for Config {
             project_name: default_project_name(),
             run_name: default_run_name(),
             channel_buffer_size: 1000,
-            db_path: loglumen_core::sqlite_db_path(),
+            db_path: sqlite_db_path(),
         }
     }
 }

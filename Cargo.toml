@@ -1,3 +1,10 @@
 [workspace]
 resolver = "3"
-members = ["be", "cli", "clients/rust", "core"]
+members = ["be", "cli", "clients/rust"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Šimon Plhák <plhak.s@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/LogLumen/loglumen"

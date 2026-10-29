@@ -1302,7 +1302,7 @@ name = "loglumen"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "loglumen-core",
+ "dirs",
  "rand 0.10.3",
  "serde",
  "serde_json",
@@ -1326,13 +1326,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "loglumen-core"
-version = "0.1.0"
-dependencies = [
- "dirs",
-]
-
-[[package]]
 name = "loglumen-server"
 version = "0.1.0"
 dependencies = [
@@ -1341,7 +1334,7 @@ dependencies = [
  "axum-extra",
  "dotenvy",
  "envy",
- "loglumen-core",
+ "loglumen",
  "rust-embed",
  "sea-query",
  "sea-query-sqlx",

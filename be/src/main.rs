@@ -34,7 +34,7 @@ struct Config {
     disable_basic_auth: bool,
     #[serde(default)]
     disable_api_key_check: bool,
-    #[serde(default = "loglumen_core::sqlite_db_path")]
+    #[serde(default = "loglumen::sqlite_db_path")]
     client_db_path: PathBuf,
 }
 
